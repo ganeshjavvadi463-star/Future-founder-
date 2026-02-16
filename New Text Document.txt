@@ -1,0 +1,39 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+import os
+
+app = FastAPI()
+
+# Enable CORS for frontend communication
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class QueryRequest(BaseModel):
+    prompt: str
+    type: str  # 'campaign', 'pitch', or 'lead'
+
+@app.get("/")
+def home():
+    return {"message": "MarketMind API is Running"}
+
+@app.post("/generate")
+async def generate_market_data(request: QueryRequest):
+    # Logic: Connect to Gemini/Groq here
+    # For now, we return a mock response
+    if request.type == "campaign":
+        result = f"AI Strategy for '{request.prompt}': Target Gen-Z via TikTok using emotional storytelling."
+    elif request.type == "pitch":
+        result = f"Sales Pitch: Hello! Our product solves {request.prompt} by reducing costs by 40%."
+    else:
+        result = "Lead Score: 85/100. High intent detected based on recent browsing."
+    
+    return {"status": "success", "output": result}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
